@@ -22,8 +22,70 @@ const createMedicine = async (req, res) => {
 };
 
 const getMedicines = async (req, res) => {
-    const medicines = await Medicine.find();
-    return res.status(200).json(medicines);
+  try {
+    const {
+      name,
+      barcode,
+      category,
+      expired,
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    const filter = {};
+
+    if (name) {
+      filter.name = {
+        $regex: name,
+        $options: "i"
+      };
+    }
+
+    if (barcode) {
+      filter.barcode = barcode;
+    }
+
+    if (category) {
+      filter.category = category;
+    }
+
+    if (expired === "true") {
+      filter.expiryDate = { $lt: new Date() };
+    }
+
+    if (expired === "soon") {
+        const today = new Date();
+
+        const thirtyDaysLater = new Date();
+        thirtyDaysLater.setDate(today.getDate() + 30);
+
+        filter.expiryDate = {
+            $gte: today,
+            $lte: thirtyDaysLater
+        };
+    }
+    const skip = (page - 1) * limit;
+
+    const medicines = await Medicine.find(filter)
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Medicine.countDocuments(filter);
+
+    return res.status(200).json({
+      page: Number(page),
+      limit: Number(limit),
+      total,
+      pages: Math.ceil(total / limit),
+      medicines
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Something went wrong"
+    });
+  }
 };
 
 const getMedicineById = async (req, res) => {
