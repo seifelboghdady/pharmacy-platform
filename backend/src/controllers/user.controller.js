@@ -18,7 +18,17 @@ const createUser = async (req, res) => {
         password: hashedPassword
         });
     
-      res.status(201).json(user);
+      return res.status(201).json({
+        message: "User created successfully",
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          pharmacyName: user.pharmacyName,
+          phone: user.phone
+        }
+      });
     }catch(error){
         console.error(error);
         if (error.code === 11000) {
@@ -91,10 +101,58 @@ const loginUser = async (req, res) => {
   });
 };
 
+const registerOwner = async (req, res) => {
+  try {
+    const { error, value } = createUserSchema.validate(req.body);
 
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message
+      });
+    }
+
+    if (value.role !== "owner") {
+      return res.status(403).json({
+        message: "Only owner registration is allowed"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(value.password, 10);
+
+    const user = await User.create({
+      ...value,
+      password: hashedPassword
+    });
+
+    return res.status(201).json({
+      message: "Owner registered successfully",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        pharmacyName: user.pharmacyName,
+        phone: user.phone
+      }
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "Email already exists"
+      });
+    }
+
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Something went wrong"
+    });
+  }
+};
 
 module.exports = {
   createUser,
   getUsers,
-  loginUser
+  loginUser,
+  registerOwner
 };

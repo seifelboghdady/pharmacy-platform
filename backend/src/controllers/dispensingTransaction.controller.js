@@ -93,7 +93,30 @@ const getDispensingTransactions = async (req, res) => {
   }
 };
 
+const getDispensingTransactionById = async (req, res) => {
+  try {
+    const transaction = await DispensingTransaction.findById(req.params.id)
+      .populate("medicine", "name barcode price")
+      .populate("dispensedBy", "name email");
+
+    if (!transaction) {
+      return res.status(404).json({
+        message: "Transaction not found"
+      });
+    }
+
+    return res.status(200).json(transaction);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Something went wrong"
+    });
+  }
+};
+
 module.exports = {
   createDispensingTransaction,
-  getDispensingTransactions
+  getDispensingTransactions,
+  getDispensingTransactionById
 };

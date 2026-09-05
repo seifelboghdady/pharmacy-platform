@@ -1,6 +1,6 @@
 const Order = require("../models/Order");
 const MissingMedicine = require("../models/MissingMedicine");
-// const Medicine = require("../models/Medicine");
+const Medicine = require("../models/Medicine");
 const { createOrderSchema, updateOrderStatusSchema } = require("../validations/order.validation");
 
 const createOrder = async (req, res) => {
@@ -116,11 +116,58 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: value.status },
-      { new: true }
-    );
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found"
+      });
+    }
+
+    if (order.status === "received") {
+      return res.status(400).json({
+        message: "Order has already been received"
+      });
+    }
+
+    if (value.status === "received") {
+      for (const item of order.items) {
+        const medicine = await Medicine.findOne({
+          barcode: item.barcode
+        });
+
+        if (medicine) {
+          medicine.stockQuantity += item.quantity;
+          await medicine.save();
+        }
+      }
+
+      await MissingMedicine.updateMany(
+        { order: order._id },
+        { status: "fulfilled" }
+      );
+    }
+
+    order.status = value.status;
+
+    await order.save();
+
+    return res.status(200).json({
+      message: "Order status updated successfully",
+      order
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Something went wrong"
+    });
+  }
+};
+
+const getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
 
     if (!order) {
       return res.status(404).json({
@@ -137,10 +184,10 @@ const updateOrderStatus = async (req, res) => {
     });
   }
 };
-
 module.exports = {
   createOrder,
   getOrders,
   generateOrderFromMissingMedicines,
-  updateOrderStatus
+  updateOrderStatus,
+  getOrderById
 };
