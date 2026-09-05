@@ -11,7 +11,7 @@ const createMissingMedicineSchema = Joi.object({
     .required(),
 
   status: Joi.string()
-    .valid("pending", "fulfilled", "cancelled")
+    .valid("pending", "ordered", "fulfilled", "cancelled")
     .default("pending"),
 
   notes: Joi.string().trim()

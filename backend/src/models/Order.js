@@ -27,9 +27,12 @@ const orderSchema = new mongoose.Schema({
     },
     items: [
         {
-            medicine: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Medicine",
+            medicineName: {
+            type: String,
+            required: true
+            },
+            barcode: {
+            type: String,
             required: true
             },
             quantity: {

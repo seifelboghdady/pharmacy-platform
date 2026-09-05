@@ -1,7 +1,7 @@
 const Order = require("../models/Order");
 const MissingMedicine = require("../models/MissingMedicine");
-const Medicine = require("../models/Medicine");
-const { createOrderSchema } = require("../validations/order.validation");
+// const Medicine = require("../models/Medicine");
+const { createOrderSchema, updateOrderStatusSchema } = require("../validations/order.validation");
 
 const createOrder = async (req, res) => {
     try{
@@ -52,31 +52,46 @@ const generateOrderFromMissingMedicines = async (req, res) => {
       });
     }
 
-    const items = [];
+    const items = missingMedicines.map((missingMedicine) => ({
+      medicineName: missingMedicine.medicineName,
+      barcode: missingMedicine.barcode,
+      quantity: missingMedicine.requiredQuantity
+    }));
 
-    for (const missingMedicine of missingMedicines) {
-      const medicine = await Medicine.findOne({
-        barcode: missingMedicine.barcode
-      });
+    // const items = [];
 
-      if (!medicine) {
-        return res.status(404).json({
-          message: `Medicine with barcode ${missingMedicine.barcode} not found`
-        });
-      }
+    // for (const missingMedicine of missingMedicines) {
+    //   const medicine = await Medicine.findOne({
+    //     barcode: missingMedicine.barcode
+    //   });
 
-      items.push({
-        medicine: medicine._id,
-        quantity: missingMedicine.requiredQuantity
-      });
-    }
+    //   if (!medicine) {
+    //     return res.status(404).json({
+    //       message: `Medicine with barcode ${missingMedicine.barcode} not found`
+    //     });
+    //   }
+
+    //   items.push({
+    //     medicine: medicine._id,
+    //     quantity: missingMedicine.requiredQuantity
+    //   });
+    // }
+
 
     const order = await Order.create({
-      supplier: "ABC Pharma",
+      supplier: "Unknown",
       createdBy: req.user.userId,
       generatedAutomatically: true,
       items
     });
+
+    await MissingMedicine.updateMany(
+      { status: "pending" },
+      {
+        status: "ordered",
+        order: order._id
+      }
+    );
 
     return res.status(201).json({
       message: "Order created successfully",
@@ -91,8 +106,41 @@ const generateOrderFromMissingMedicines = async (req, res) => {
   }
 };
 
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { error, value } = updateOrderStatusSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message
+      });
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status: value.status },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found"
+      });
+    }
+
+    return res.status(200).json(order);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Something went wrong"
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrders,
-  generateOrderFromMissingMedicines
+  generateOrderFromMissingMedicines,
+  updateOrderStatus
 };

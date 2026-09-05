@@ -17,11 +17,16 @@ const missingMedicineSchema = new mongoose.Schema({
     status: {
     type: String,
     required: true,
-    enum: ["pending", "fulfilled", "cancelled"],
+    enum: ["pending", "ordered", "fulfilled", "cancelled"],
     default: "pending"
     },
     notes: {
     type: String
+    },
+    order: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Order",
+    default: null
     }
 },{timestamps: true});
 
