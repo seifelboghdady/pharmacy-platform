@@ -11,7 +11,10 @@ const createMissingMedicine = async (req, res) => {
       });
     }
 
-    const missingMedicine = await MissingMedicine.create(value);
+    const missingMedicine = await MissingMedicine.create({
+      ...value,
+      requestedBy: req.user.userId
+    });
 
     return res.status(201).json(missingMedicine);
   } catch (error) {
@@ -25,9 +28,14 @@ const createMissingMedicine = async (req, res) => {
 
 const getMissingMedicines = async (req, res) => {
   try {
-    const missingMedicines = await MissingMedicine.find({
-      status: "pending"
-    });
+    const filter = {};
+
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    const missingMedicines = await MissingMedicine.find(filter)
+      .populate("requestedBy", "name email");
 
     return res.status(200).json(missingMedicines);
   } catch (error) {

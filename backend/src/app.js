@@ -1,4 +1,8 @@
 const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+
 
 const app = express();
 const userRoutes = require("./routes/user.routes");
@@ -8,6 +12,10 @@ const orderRoutes = require("./routes/order.routes");
 const missingMedicineRoutes = require("./routes/missingMedicine.routes");
 const dispensingTransactionRoutes = require("./routes/dispensingTransaction.routes");
 
+// Security & logging middleware
+app.use(helmet());
+app.use(cors());
+app.use(morgan("dev"));
 
 app.use(express.json());
 app.use("/api/users", userRoutes);
