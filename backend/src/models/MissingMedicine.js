@@ -27,7 +27,12 @@ const missingMedicineSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order",
     default: null
-    }
+    },
+    requestedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+    },
 },{timestamps: true});
 
 module.exports = mongoose.model("MissingMedicine", missingMedicineSchema);

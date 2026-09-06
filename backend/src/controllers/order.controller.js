@@ -52,11 +52,22 @@ const generateOrderFromMissingMedicines = async (req, res) => {
       });
     }
 
-    const items = missingMedicines.map((missingMedicine) => ({
-      medicineName: missingMedicine.medicineName,
-      barcode: missingMedicine.barcode,
-      quantity: missingMedicine.requiredQuantity
-    }));
+    const groupedMedicines = {};
+
+    for (const missingMedicine of missingMedicines) {
+      if (!groupedMedicines[missingMedicine.barcode]) {
+        groupedMedicines[missingMedicine.barcode] = {
+          medicineName: missingMedicine.medicineName,
+          barcode: missingMedicine.barcode,
+          quantity: 0
+        };
+      }
+
+      groupedMedicines[missingMedicine.barcode].quantity +=
+        missingMedicine.requiredQuantity;
+    }
+
+    const items = Object.values(groupedMedicines);
 
     // const items = [];
 
