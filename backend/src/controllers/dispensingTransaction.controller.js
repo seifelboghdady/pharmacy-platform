@@ -1,11 +1,8 @@
-const mongoose = require("mongoose");
 const DispensingTransaction = require("../models/DispensingTransaction");
 const Medicine = require("../models/Medicine");
 const {createDispensingTransactionSchema} = require("../validations/dispensingTransaction.validation");
 
 const createDispensingTransaction = async (req, res) => {
-  let session;
-
   try {
     const { error, value } =
       createDispensingTransactionSchema.validate(req.body);
@@ -16,22 +13,15 @@ const createDispensingTransaction = async (req, res) => {
       });
     }
 
-    session = await mongoose.startSession();
-    session.startTransaction();
-
-    const medicine = await Medicine.findById(value.medicine).session(session);
+    const medicine = await Medicine.findById(value.medicine);
 
     if (!medicine) {
-      await session.abortTransaction();
-
       return res.status(404).json({
         message: "Medicine not found"
       });
     }
 
     if (medicine.stockQuantity < value.quantity) {
-      await session.abortTransaction();
-
       return res.status(400).json({
         message: "Insufficient stock"
       });
@@ -39,51 +29,59 @@ const createDispensingTransaction = async (req, res) => {
 
     const totalPrice = medicine.price * value.quantity;
 
-    const transaction = await DispensingTransaction.create(
-      [
-        {
-          medicine: medicine._id,
-          quantity: value.quantity,
-          totalPrice,
-          dispensedBy: req.user.userId
-        }
-      ],
-      { session }
-    );
+    const transaction = await DispensingTransaction.create({
+      medicine: medicine._id,
+      quantity: value.quantity,
+      totalPrice,
+      dispensedBy: req.user.userId
+    });
 
     medicine.stockQuantity -= value.quantity;
 
-    await medicine.save({ session });
+    await medicine.save();
 
-    await session.commitTransaction();
+    await transaction.populate({
+      path: "medicine",
+      populate: {
+        path: "medicineCatalog"
+      }
+    });
+
+    await transaction.populate(
+      "dispensedBy",
+      "name email"
+    );
 
     return res.status(201).json({
       message: "Medicine dispensed successfully",
-      transaction: transaction[0]
+      transaction
     });
-  } catch (error) {
-    if (session) {
-      await session.abortTransaction();
-    }
 
+  } catch (error) {
     console.error(error);
 
     return res.status(500).json({
       message: "Something went wrong"
     });
-  } finally {
-    if (session) {
-      await session.endSession();
-    }
   }
 };
+
 const getDispensingTransactions = async (req, res) => {
   try {
     const transactions = await DispensingTransaction.find()
-      .populate("medicine", "name barcode price")
-      .populate("dispensedBy", "name email");
+      .populate({
+        path: "medicine",
+        populate: {
+          path: "medicineCatalog"
+        }
+      })
+      .populate(
+        "dispensedBy",
+        "name email"
+      );
 
     return res.status(200).json(transactions);
+
   } catch (error) {
     console.error(error);
 
@@ -95,9 +93,19 @@ const getDispensingTransactions = async (req, res) => {
 
 const getDispensingTransactionById = async (req, res) => {
   try {
-    const transaction = await DispensingTransaction.findById(req.params.id)
-      .populate("medicine", "name barcode price")
-      .populate("dispensedBy", "name email");
+    const transaction = await DispensingTransaction.findById(
+      req.params.id
+    )
+      .populate({
+        path: "medicine",
+        populate: {
+          path: "medicineCatalog"
+        }
+      })
+      .populate(
+        "dispensedBy",
+        "name email"
+      );
 
     if (!transaction) {
       return res.status(404).json({
@@ -106,6 +114,7 @@ const getDispensingTransactionById = async (req, res) => {
     }
 
     return res.status(200).json(transaction);
+
   } catch (error) {
     console.error(error);
 

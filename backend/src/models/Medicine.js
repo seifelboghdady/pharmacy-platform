@@ -1,22 +1,10 @@
 const mongoose = require("mongoose");
 
 const medicineSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    barcode:{
-        type: String,
-        required: true,
-        unique: true
-    },
-    manufacturer: {
-        type: String,
-        required: true
-    },
-    category: {
-        type: String,
-        required: true
+    medicineCatalog: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "MedicineCatalog",
+      required: true
     },
     price: {
         type: Number,
@@ -34,11 +22,10 @@ const medicineSchema = new mongoose.Schema({
     supplier: {
         type: String,
         required: true
-    },
-    unit: {
-        type: String,
-        required: true
     }
 }, {timestamps: true});
+
+medicineSchema.index({ medicineCatalog: 1 });
+medicineSchema.index({ expiryDate: 1 });
 
 module.exports = mongoose.model("Medicine", medicineSchema);
