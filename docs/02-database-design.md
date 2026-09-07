@@ -551,37 +551,7 @@ The related missing medicine records can then be marked as fulfilled.
 
 The main relationships can be represented as:
 
-```text
-User
- │
- ├───────────────┐
- │               │
- ▼               ▼
-MissingMedicine  Order
- │               │
- │               │
- └───────┐       │
-         ▼       │
-        Order ◄──┘
-
-
-MedicineCatalog
-      │
-      │
-      ▼
-Medicine
-      │
-      ▼
-DispensingTransaction
-
-User
- │
- ├── requestedBy ──► MissingMedicine
- │
- ├── createdBy ────► Order
- │
- └── dispensedBy ──► DispensingTransaction
-```
+![](./images/UserFlow.png)
 
 ---
 
@@ -771,6 +741,6 @@ MongoDB remains authoritative even when Redis is used.
 
 ## Database Architecture Summary
 
-![Photo](\images\DBdesign.png)
+![Database Design](./images/DBdesign.png)
 
 The resulting database structure separates master data, pharmacy-specific operational data, and transactional records while maintaining clear relationships between them.
