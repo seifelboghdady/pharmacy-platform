@@ -18,8 +18,19 @@ const createUser = async (req, res) => {
         password: hashedPassword
         });
     
+        const token = jwt.sign(
+          {
+            userId: user._id,
+            role: user.role
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "1d"
+          }
+        );
       return res.status(201).json({
         message: "User created successfully",
+        token,
         user: {
           _id: user._id,
           name: user.name,
@@ -124,8 +135,20 @@ const registerOwner = async (req, res) => {
       password: hashedPassword
     });
 
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d"
+      }
+    );
+
     return res.status(201).json({
       message: "Owner registered successfully",
+      token,
       user: {
         _id: user._id,
         name: user.name,
