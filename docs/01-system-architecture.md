@@ -33,7 +33,7 @@ The architecture is designed around the following principles:
 ---
 
 ## Architecture Diagram
-![النص البديل](\images\SystemArc.png)
+![](./images/SystemArc.png)
 
 
 ---
