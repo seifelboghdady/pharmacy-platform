@@ -115,6 +115,44 @@ class _ScannerViewState extends State<_ScannerView> {
               MobileScanner(
                 controller: _controller,
                 onDetect: (capture) => _onDetect(capture, cubit),
+                errorBuilder: (context, error, child) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.camera_alt_outlined,
+                            color: Colors.white54,
+                            size: 64,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            error.errorCode == MobileScannerErrorCode.permissionDenied
+                                ? 'Camera permission denied.\nPlease allow camera access from Settings.'
+                                : 'Camera error: ${error.errorDetails?.message ?? 'Unknown error'}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.white38),
+                            ),
+                            icon: const Icon(Icons.refresh),
+                            onPressed: () => _controller.start(),
+                            label: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
               Container(color: Colors.black.withOpacity(0.35)),
               Column(

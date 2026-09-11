@@ -131,7 +131,7 @@ class _DashboardView extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
-                    childAspectRatio: 0.85,
+                    childAspectRatio: 0.75,
                     children: [
                       _QuickAction(
                         icon: Iconsax.scan_barcode,
