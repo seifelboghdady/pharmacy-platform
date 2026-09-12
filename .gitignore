@@ -1,2 +1,5 @@
 node_modules
 .env
+*.xlsx
+__pycache__/
+*.pyc
