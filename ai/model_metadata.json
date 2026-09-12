@@ -1,0 +1,29 @@
+{
+  "feature_cols": [
+    "day_of_week",
+    "month",
+    "is_holiday",
+    "sales_last_7_days",
+    "sales_last_30_days",
+    "rolling_avg_14_days",
+    "PromoActive",
+    "ProductID",
+    "Category"
+  ],
+  "categorical_cols": [
+    "ProductID",
+    "Category"
+  ],
+  "target_col": "sales_next_30_days",
+  "best_params": {
+    "n_estimators": 359,
+    "num_leaves": 48,
+    "max_depth": 3,
+    "learning_rate": 0.07934764909996739,
+    "min_child_samples": 15,
+    "subsample": 0.6042433891228487,
+    "colsample_bytree": 0.6742545704821068
+  },
+  "mean_outer_fold_mae": 23.575445263082667,
+  "n_outer_folds": 5
+}
