@@ -1,0 +1,13 @@
+pandas
+numpy
+pyarrow
+openpyxl
+lightgbm
+scikit-learn
+optuna
+joblib
+fastapi
+uvicorn
+streamlit
+pymongo
+python-dotenv
