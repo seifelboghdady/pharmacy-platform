@@ -1,0 +1,276 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Bootstrap primary override ── */
+:root {
+  --bs-primary: #1565C0;
+  --bs-primary-rgb: 21, 101, 192;
+  --bs-link-color: #1565C0;
+  --bs-link-hover-color: #0D47A1;
+  --pharma-teal: #00ACC1;
+  --pharma-sidebar: #1A2332;
+  --pharma-sidebar-hover: #243447;
+  --pharma-surface: #F8FAFC;
+  --pharma-border: #E2E8F0;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Bootstrap button overrides ── */
+.btn-primary {
+  background-color: #1565C0 !important;
+  border-color: #1565C0 !important;
+}
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #0D47A1 !important;
+  border-color: #0D47A1 !important;
+}
+.btn-outline-primary {
+  color: #1565C0 !important;
+  border-color: #1565C0 !important;
+}
+.btn-outline-primary:hover {
+  background-color: #1565C0 !important;
+  color: #fff !important;
+}
+
+/* ── Dashboard layout ── */
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+.pharma-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--pharma-sidebar);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.pharma-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.pharma-topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--pharma-border);
+  padding: 0.75rem 1.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pharma-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--pharma-surface);
+  padding: 1.5rem;
+}
+
+/* ── Sidebar nav ── */
+.sidebar-logo {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-decoration: none;
+}
+.sidebar-nav-item {
+  color: rgba(255,255,255,0.55);
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  cursor: pointer;
+  margin: 1px 0;
+}
+.sidebar-nav-item:hover {
+  background: var(--pharma-sidebar-hover);
+  color: rgba(255,255,255,0.9);
+}
+.sidebar-nav-item.active {
+  background: #1565C0;
+  color: #fff;
+}
+.sidebar-logout {
+  color: rgba(255,255,255,0.4);
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  transition: all 0.15s;
+}
+.sidebar-logout:hover {
+  background: rgba(239,68,68,0.15);
+  color: #EF4444;
+}
+
+/* ── KPI Cards ── */
+.kpi-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--pharma-border);
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+/* ── Table enhancements ── */
+.pharma-table thead th {
+  background: var(--pharma-surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--pharma-border);
+  padding: 0.75rem 1rem;
+}
+.pharma-table tbody td {
+  padding: 0.7rem 1rem;
+  font-size: 0.8125rem;
+  vertical-align: middle;
+  border-color: var(--pharma-border);
+}
+.pharma-table tbody tr {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.pharma-table tbody tr:hover {
+  background: #F1F5F9;
+}
+
+/* ── Status badges ── */
+.badge-success { background: #DCFCE7; color: #16A34A; }
+.badge-warning { background: #FEF3C7; color: #D97706; }
+.badge-danger  { background: #FFF1F2; color: #EF4444; }
+.badge-info    { background: #DBEAFE; color: #2563EB; }
+.badge-purple  { background: #F5F3FF; color: #7C3AED; }
+
+/* ── Cursor pointer everywhere it matters ── */
+button, [role="button"], a, label, select,
+.card[onclick], .clickable, .badge,
+.pagination .page-link { cursor: pointer; }
+
+/* ── Form ── */
+.form-control:focus, .form-select:focus {
+  border-color: #1565C0;
+  box-shadow: 0 0 0 0.2rem rgba(21,101,192,0.15);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Chart bars ── */
+.chart-bar { transition: opacity 0.2s; }
+.chart-bar:hover { opacity: 0.85; }
+
+/* ── Landing ── */
+.hero-section {
+  background: linear-gradient(135deg, #F0F7FF 0%, #E8F4FD 100%);
+  padding: 5rem 0;
+}
+.stats-section {
+  background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+  padding: 3.5rem 0;
+}
+.feature-card {
+  border-radius: 16px;
+  border: 1px solid var(--pharma-border);
+  padding: 1.5rem;
+  transition: box-shadow 0.2s;
+  cursor: pointer;
+  height: 100%;
+  background: #fff;
+}
+.feature-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+
+/* ── Auth pages ── */
+.auth-left {
+  background: linear-gradient(160deg, #1565C0 0%, #0D47A1 50%, #1A2332 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 3rem;
+}
+.auth-right {
+  background: var(--pharma-surface);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+.auth-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 380px;
+}
+
+/* ── Insight cards ── */
+.insight-card {
+  border-radius: 16px;
+  border: 1px solid var(--pharma-border);
+  background: #fff;
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.insight-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+/* ── Dispense step cards ── */
+.step-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--pharma-border);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+/* ── Toggle switch ── */
+.toggle-switch {
+  position: relative;
+  width: 42px;
+  height: 22px;
+  border-radius: 11px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
