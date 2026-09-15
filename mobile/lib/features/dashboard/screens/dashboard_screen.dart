@@ -7,6 +7,7 @@ import '../cubit/dashboard_state.dart';
 import '../../scanner/screens/qr_scanner_screen.dart';
 import '../../inventory/screens/medicines_list_screen.dart';
 import 'quick_actions_screen.dart';
+import '../../missing_medicines/screens/add_shortage_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final String pharmacistName;
@@ -144,7 +145,11 @@ class _DashboardView extends StatelessWidget {
                       _QuickAction(
                         icon: Iconsax.box_add,
                         label: 'Add Shortage',
-                        onTap: () {},
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AddShortageScreen(),
+                          ),
+                        ),
                       ),
                       _QuickAction(
                         icon: Iconsax.add_square,
@@ -187,14 +192,48 @@ class _DashboardView extends StatelessWidget {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: 0,
+        onDestinationSelected: (index) {
+          if (index == 0) {
+            return;
+          }
+
+          if (index == 1) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const MedicinesListScreen(),
+              ),
+            );
+            return;
+          }
+
+          if (index == 3) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const QuickActionsScreen(),
+              ),
+            );
+            return;
+          }
+
+          
+        },
         destinations: const [
-          NavigationDestination(icon: Icon(Iconsax.home_2), label: 'Home'),
           NavigationDestination(
-              icon: Icon(Iconsax.health), label: 'Medicines'),
+            icon: Icon(Iconsax.home_2),
+            label: 'Home',
+          ),
           NavigationDestination(
-              icon: Icon(Iconsax.receipt_2_1), label: 'Orders'),
+            icon: Icon(Iconsax.health),
+            label: 'Medicines',
+          ),
           NavigationDestination(
-              icon: Icon(Iconsax.grid_5), label: 'More'),
+            icon: Icon(Iconsax.receipt_2_1),
+            label: 'Orders',
+          ),
+          NavigationDestination(
+            icon: Icon(Iconsax.grid_5),
+            label: 'More',
+          ),
         ],
       ),
     );
