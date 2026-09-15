@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../scanner/screens/qr_scanner_screen.dart';
 import '../../inventory/screens/medicines_list_screen.dart';
 import '../../missing_medicines/screens/add_shortage_screen.dart';
+import '../../missing_medicines/screens/missing_medicines_screen.dart';
 
 class _Action {
   final IconData icon;
@@ -40,10 +41,21 @@ class QuickActionsScreen extends StatelessWidget {
       _Action(Iconsax.health, 'View Medicines', 'Browse all medicines',
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => const MedicinesListScreen()))),
+      _Action(
+        Iconsax.receipt_item,
+        'Missing Medicines',
+        'View shortage requests',
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const MissingMedicinesScreen(),
+          ),
+        ),
+      ),
       const _Action.plain(
           Iconsax.chart_2, 'View Reports', 'See reports & analytics'),
       const _Action.plain(
           Iconsax.setting_2, 'Settings', 'App preferences'),
+      
     ];
 
     return Scaffold(
