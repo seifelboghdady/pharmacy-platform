@@ -8,25 +8,37 @@ import '../cubit/scanner_state.dart';
 import 'scan_result_screen.dart';
 
 class QrScannerScreen extends StatelessWidget {
-  const QrScannerScreen({super.key});
+  final bool returnMedicine;
+
+  const QrScannerScreen({
+    super.key,
+    this.returnMedicine = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => ScannerCubit(),
-      child: const _ScannerView(),
+      child: _ScannerView(
+        returnMedicine: returnMedicine,
+      ),
     );
   }
 }
 
 class _ScannerView extends StatefulWidget {
-  const _ScannerView();
+  final bool returnMedicine;
+
+  const _ScannerView({
+    required this.returnMedicine,
+  });
 
   @override
   State<_ScannerView> createState() => _ScannerViewState();
 }
 
 class _ScannerViewState extends State<_ScannerView> {
+  bool get _returnMedicine => widget.returnMedicine;
   final MobileScannerController _controller = MobileScannerController(
     detectionSpeed: DetectionSpeed.normal,
   );
@@ -92,20 +104,32 @@ class _ScannerViewState extends State<_ScannerView> {
       body: BlocConsumer<ScannerCubit, ScannerState>(
         listener: (context, state) {
           if (state.status == ScannerStatus.notFound) {
+            if (widget.returnMedicine && state.barcode != null) {
+              Navigator.of(context).pop(state.barcode);
+              return;
+            }
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Medicine not found')),
             );
+
             setState(() => _handled = false);
             _controller.start();
           } else if (state.status == ScannerStatus.found &&
               state.medicine != null) {
-            Navigator.of(context)
-                .pushReplacement(
-                  MaterialPageRoute(
-                    builder: (_) => ScanResultScreen(medicine: state.medicine!),
-                  ),
-                )
-                .then((_) => context.read<ScannerCubit>().reset());
+              if (_returnMedicine) {
+                Navigator.of(context).pop(state.medicine!);
+              } else {
+                Navigator.of(context)
+                    .pushReplacement(
+                      MaterialPageRoute(
+                          builder: (_) => ScanResultScreen(
+                          medicine: state.medicine!,
+                        ),
+                      ),
+                    )
+                    .then((_) => context.read<ScannerCubit>().reset());
+              }
           }
         },
         builder: (context, state) {

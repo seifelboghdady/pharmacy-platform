@@ -6,6 +6,8 @@ import '../../../core/widgets/medicine_card.dart';
 import '../cubit/inventory_cubit.dart';
 import '../cubit/inventory_state.dart';
 import 'filter_search_screen.dart';
+import '../../dashboard/screens/dashboard_screen.dart';
+import '../../dashboard/screens/quick_actions_screen.dart';
 
 class MedicinesListScreen extends StatelessWidget {
   const MedicinesListScreen({super.key});
@@ -113,17 +115,50 @@ class _MedicinesListView extends StatelessWidget {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: 1,
+        onDestinationSelected: (index) {
+          if (index == 1) {
+            return;
+          }
+
+          if (index == 0) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const DashboardScreen(),
+              ),
+            );
+            return;
+          }
+
+          if (index == 3) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const QuickActionsScreen(),
+              ),
+            );
+            return;
+          }
+
+          // Orders لسه مفيش Screen له
+        },
         destinations: const [
-          NavigationDestination(icon: Icon(Iconsax.home_2), label: 'Home'),
           NavigationDestination(
-              icon: Icon(Iconsax.health), label: 'Medicines'),
+            icon: Icon(Iconsax.home_2),
+            label: 'Home',
+          ),
           NavigationDestination(
-              icon: Icon(Iconsax.receipt_2_1), label: 'Orders'),
+            icon: Icon(Iconsax.health),
+            label: 'Medicines',
+          ),
           NavigationDestination(
-              icon: Icon(Iconsax.grid_5), label: 'More'),
+            icon: Icon(Iconsax.receipt_2_1),
+            label: 'Orders',
+          ),
+          NavigationDestination(
+            icon: Icon(Iconsax.grid_5),
+            label: 'More',
+          ),
         ],
-      ),
-    );
+      ),    );
   }
 }
 

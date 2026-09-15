@@ -11,18 +11,41 @@ class ScannerCubit extends Cubit<ScannerState> {
   final MedicineRepository _repository;
 
   Future<void> lookupCode(String code) async {
-    emit(state.copyWith(status: ScannerStatus.scanning));
+    emit(
+      state.copyWith(
+        status: ScannerStatus.scanning,
+        barcode: code,
+      ),
+    );
+
     try {
       final medicine = await _repository.findByBarcode(code);
+
       if (medicine == null) {
-        emit(state.copyWith(status: ScannerStatus.notFound));
+        emit(
+          state.copyWith(
+            status: ScannerStatus.notFound,
+            barcode: code,
+          ),
+        );
         return;
       }
-      emit(state.copyWith(status: ScannerStatus.found, medicine: medicine));
+
+      emit(
+        state.copyWith(
+          status: ScannerStatus.found,
+          medicine: medicine,
+          barcode: code,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(status: ScannerStatus.notFound));
+      emit(
+        state.copyWith(
+          status: ScannerStatus.notFound,
+          barcode: code,
+        ),
+      );
     }
   }
-
   void reset() => emit(const ScannerState());
 }

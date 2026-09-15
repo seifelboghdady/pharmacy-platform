@@ -3,6 +3,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../scanner/screens/qr_scanner_screen.dart';
 import '../../inventory/screens/medicines_list_screen.dart';
+import '../../missing_medicines/screens/add_shortage_screen.dart';
 
 class _Action {
   final IconData icon;
@@ -24,8 +25,16 @@ class QuickActionsScreen extends StatelessWidget {
           'Scan QR to dispense',
           onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const QrScannerScreen()))),
-      const _Action.plain(
-          Iconsax.box_add, 'Add Shortage', 'Add medicine shortage'),
+      _Action(
+          Iconsax.box_add,
+          'Add Shortage',
+          'Add medicine shortage',
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const AddShortageScreen(),
+            ),
+          ),
+        ),
       const _Action.plain(
           Iconsax.add_square, 'Add Order', 'Create new order'),
       _Action(Iconsax.health, 'View Medicines', 'Browse all medicines',
