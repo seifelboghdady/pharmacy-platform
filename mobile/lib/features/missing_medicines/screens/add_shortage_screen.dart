@@ -6,6 +6,8 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/data/medicine_repository.dart';
 import '../../../shared/models/medicine_model.dart';
+import '../../../shared/models/medicine_catalog_model.dart';
+import 'medicine_catalog_picker_screen.dart';
 import 'shortage_details_screen.dart';
 
 class AddShortageScreen extends StatefulWidget {
@@ -105,6 +107,42 @@ class _AddShortageScreenState extends State<AddShortageScreen> {
 
     _debounce?.cancel();
     _search(query);
+  }
+
+  Future<void> _searchCatalog() async {
+    final query = _searchController.text.trim();
+    if (query.isEmpty) return;
+
+    final result = await Navigator.of(context).push<MedicineCatalogModel>(
+      MaterialPageRoute(
+        builder: (_) => MedicineCatalogPickerScreen(
+          query: query,
+          barcodeMode: _searchMode == 1,
+        ),
+      ),
+    );
+
+    if (!mounted || result == null) return;
+
+    final medicine = MedicineModel(
+      id: '',
+      catalogId: result.id,
+      name: result.name,
+      category: result.category,
+      activeIngredient: result.activeIngredient,
+      manufacturer: result.manufacturer,
+      barcode: result.barcode,
+      stock: 0,
+      price: 0,
+      expiryDate: '',
+      supplier: '',
+    );
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ShortageDetailsScreen(medicine: medicine),
+      ),
+    );
   }
   Future<void> _openBarcodeScanner() async {
     final result = await Navigator.of(context).push(
@@ -309,9 +347,7 @@ class _AddShortageScreenState extends State<AddShortageScreen> {
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
-              onPressed: () {
-                // Catalog search will be implemented in the next step.
-              },
+              onPressed: _searchCatalog,
               icon: const Icon(Iconsax.global_search),
               label: const Text('Search Medicine Catalog'),
             ),

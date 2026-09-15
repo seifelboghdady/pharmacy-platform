@@ -33,33 +33,27 @@ class MissingMedicineRepository {
         ? response['data'] ?? response
         : response;
 
-    if (data is List) {
-      return data
-          .map(
-            (item) => MissingMedicineModel.fromJson(
-              Map<String, dynamic>.from(item),
-            ),
-          )
-          .toList();
-    }
+    List items = const [];
 
-    if (data is Map<String, dynamic>) {
-      final items = data['missingMedicines'] ??
+    if (data is List) {
+      items = data;
+    } else if (data is Map<String, dynamic>) {
+      final raw = data['missingMedicines'] ??
           data['medicines'] ??
           data['data'];
-
-      if (items is List) {
-        return items
-            .map(
-              (item) => MissingMedicineModel.fromJson(
-                Map<String, dynamic>.from(item),
-              ),
-            )
-            .toList();
-      }
+      if (raw is List) items = raw;
     }
 
-    return [];
+    return items
+        .whereType<Map>()
+        .map((item) => MissingMedicineModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ))
+        .where((medicine) {
+          final status = medicine.status.trim().toLowerCase();
+          return status.isEmpty || status == 'pending';
+        })
+        .toList();
   }
 
   Future<dynamic> generateOrderFromMissing() async {

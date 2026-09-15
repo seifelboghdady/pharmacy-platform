@@ -8,22 +8,28 @@ import '../../scanner/screens/qr_scanner_screen.dart';
 import '../../inventory/screens/medicines_list_screen.dart';
 import 'quick_actions_screen.dart';
 import '../../missing_medicines/screens/add_shortage_screen.dart';
+import '../../orders/screens/orders_screen.dart';
+import '../../reports/screens/reports_screen.dart';
+import '../../../shared/models/user_model.dart';
+import '../../profile/screens/profile_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final String pharmacistName;
-  const DashboardScreen({super.key, this.pharmacistName = ''});
+  final UserModel? user;
+  const DashboardScreen({super.key, this.pharmacistName = '', this.user});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => DashboardCubit(pharmacistName: pharmacistName),
-      child: const _DashboardView(),
+      create: (_) => DashboardCubit(pharmacistName: user?.name ?? pharmacistName),
+      child: _DashboardView(user: user),
     );
   }
 }
 
 class _DashboardView extends StatelessWidget {
-  const _DashboardView();
+  final UserModel? user;
+  const _DashboardView({this.user});
 
   static const _months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -90,9 +96,14 @@ class _DashboardView extends StatelessWidget {
                                   color: AppColors.textGrey, fontSize: 12.5)),
                         ],
                       ),
-                      const CircleAvatar(
-                        backgroundColor: AppColors.chipGrey,
-                        child: Icon(Iconsax.user, color: AppColors.primary),
+                      GestureDetector(
+                        onTap: user == null ? null : () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => ProfileScreen(user: user!)),
+                        ),
+                        child: const CircleAvatar(
+                          backgroundColor: AppColors.chipGrey,
+                          child: Icon(Iconsax.user, color: AppColors.primary),
+                        ),
                       ),
                     ],
                   ),
@@ -121,6 +132,10 @@ class _DashboardView extends StatelessWidget {
                     value: '${state.outOfStock}',
                     valueColor: AppColors.danger,
                   ),
+                  if (state.aiInsight != null) ...[
+                    const SizedBox(height: 24),
+                    _AiInsightCard(insight: state.aiInsight!),
+                  ],
                   const SizedBox(height: 24),
                   const Text('Quick Actions',
                       style: TextStyle(
@@ -154,7 +169,11 @@ class _DashboardView extends StatelessWidget {
                       _QuickAction(
                         icon: Iconsax.add_square,
                         label: 'Add Order',
-                        onTap: () {},
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const OrdersScreen(),
+                          ),
+                        ),
                       ),
                       _QuickAction(
                         icon: Iconsax.health,
@@ -167,7 +186,11 @@ class _DashboardView extends StatelessWidget {
                       _QuickAction(
                         icon: Iconsax.chart_2,
                         label: 'View Reports',
-                        onTap: () {},
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ReportsScreen(),
+                          ),
+                        ),
                       ),
                       _QuickAction(
                         icon: Iconsax.setting_2,
@@ -206,6 +229,15 @@ class _DashboardView extends StatelessWidget {
             return;
           }
 
+          if (index == 2) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const OrdersScreen(),
+              ),
+            );
+            return;
+          }
+
           if (index == 3) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
@@ -214,8 +246,6 @@ class _DashboardView extends StatelessWidget {
             );
             return;
           }
-
-          
         },
         destinations: const [
           NavigationDestination(
@@ -322,4 +352,42 @@ class _QuickAction extends StatelessWidget {
       ),
     );
   }
+}
+
+class _AiInsightCard extends StatelessWidget {
+  final DashboardAiInsight insight;
+  const _AiInsightCard({required this.insight});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Icon(Iconsax.cpu, color: AppColors.primary),
+          const SizedBox(width: 8),
+          const Expanded(child: Text('AI Analysis', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800))),
+          Text(insight.riskLevel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
+        ]),
+        const SizedBox(height: 12),
+        Text(insight.medicineName, style: const TextStyle(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 8),
+        Row(children: [
+          Expanded(child: _AiMetric(label: 'Predicted Demand', value: insight.predictedDemand.toStringAsFixed(1))),
+          Expanded(child: _AiMetric(label: 'Reorder Qty', value: '${insight.reorderQuantity}')),
+        ]),
+      ]),
+    );
+  }
+}
+
+class _AiMetric extends StatelessWidget {
+  final String label, value;
+  const _AiMetric({required this.label, required this.value});
+  @override
+  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textGrey)), const SizedBox(height: 3), Text(value, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800))]);
 }

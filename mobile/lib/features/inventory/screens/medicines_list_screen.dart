@@ -8,6 +8,7 @@ import '../cubit/inventory_state.dart';
 import 'filter_search_screen.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../dashboard/screens/quick_actions_screen.dart';
+import 'medicine_details_screen.dart';
 
 class MedicinesListScreen extends StatelessWidget {
   const MedicinesListScreen({super.key});
@@ -106,7 +107,16 @@ class _MedicinesListView extends StatelessWidget {
                         itemCount: medicines.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (context, i) =>
-                            MedicineCard(medicine: medicines[i]),
+                            MedicineCard(
+                              medicine: medicines[i],
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => MedicineDetailsScreen(
+                                    medicine: medicines[i],
+                                  ),
+                                ),
+                              ),
+                            ),
                       ),
               ),
             ],

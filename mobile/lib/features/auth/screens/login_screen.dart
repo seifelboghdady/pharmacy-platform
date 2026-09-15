@@ -34,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   MaterialPageRoute(
                     builder: (_) => DashboardScreen(
                       pharmacistName: state.user?.name ?? '',
+                      user: state.user,
                     ),
                   ),
                 );

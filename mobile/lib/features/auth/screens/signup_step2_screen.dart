@@ -32,6 +32,7 @@ class _SignUpStep2ScreenState extends State<SignUpStep2Screen> {
                 MaterialPageRoute(
                   builder: (_) => DashboardScreen(
                     pharmacistName: state.user?.name ?? '',
+                      user: state.user,
                   ),
                 ),
                 (route) => false,
