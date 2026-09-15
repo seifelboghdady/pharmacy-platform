@@ -5,7 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/network/api_service.dart';
 import '../../../shared/models/missing_medicine_model.dart';
 import '../data/missing_medicine_repository.dart';
-import '../../orders/screens/create_order_screen.dart';
+import '../../orders/screens/orders_screen.dart';
 
 class MissingMedicinesScreen extends StatefulWidget {
   const MissingMedicinesScreen({super.key});
@@ -16,24 +16,11 @@ class MissingMedicinesScreen extends StatefulWidget {
 }
 
 class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
-  final MissingMedicineRepository _repository =
-      MissingMedicineRepository();
-
-  final Set<String> _selectedMedicineIds = {};
-
+  final MissingMedicineRepository _repository = MissingMedicineRepository();
   List<MissingMedicineModel> _medicines = [];
   bool _isLoading = true;
   String? _error;
-  
-  void _toggleSelection(String id) {
-    setState(() {
-      if (_selectedMedicineIds.contains(id)) {
-        _selectedMedicineIds.remove(id);
-      } else {
-        _selectedMedicineIds.add(id);
-      }
-    });
-  }
+
   @override
   void initState() {
     super.initState();
@@ -48,16 +35,13 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
 
     try {
       final medicines = await _repository.getMissingMedicines();
-
       if (!mounted) return;
-
       setState(() {
         _medicines = medicines;
         _isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
-
       setState(() {
         _isLoading = false;
         _error = ApiService.friendlyError(e);
@@ -65,33 +49,18 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
     }
   }
 
-  Color _statusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'resolved':
-      case 'completed':
-        return AppColors.success;
+  Future<void> _openOrders() async {
+    final changed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => OrdersScreen(
+          medicines: List<MissingMedicineModel>.from(_medicines),
+        ),
+      ),
+    );
 
-      case 'cancelled':
-      case 'rejected':
-        return AppColors.danger;
-
-      default:
-        return AppColors.warning;
+    if (changed == true && mounted) {
+      _loadMissingMedicines();
     }
-  }
-
-  String _statusText(String status) {
-    if (status.isEmpty) return 'Pending';
-
-    return status
-        .replaceAll('_', ' ')
-        .split(' ')
-        .map(
-          (word) => word.isEmpty
-              ? word
-              : '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}',
-        )
-        .join(' ');
   }
 
   @override
@@ -117,30 +86,14 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
             onRefresh: _loadMissingMedicines,
             child: _buildBody(),
           ),
-
-          if (_selectedMedicineIds.isNotEmpty)
+          if (_medicines.isNotEmpty && !_isLoading)
             Positioned(
               left: 16,
               right: 16,
               bottom: 16,
               child: SafeArea(
                 child: ElevatedButton(
-                  onPressed: () {
-                    final selectedMedicines = _medicines
-                    .where(
-                      (medicine) =>
-                          _selectedMedicineIds.contains(medicine.id),
-                    )
-                    .toList();
-
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => CreateOrderScreen(
-                      medicines: selectedMedicines,
-                    ),
-                  ),
-                );
-                  },
+                  onPressed: _openOrders,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -151,7 +104,7 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
                     ),
                   ),
                   child: Text(
-                    '${_selectedMedicineIds.length} Selected  •  Create Order',
+                    '${_medicines.length} Selected  •  Create Order',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -168,9 +121,7 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primary,
-        ),
+        child: CircularProgressIndicator(color: AppColors.primary),
       );
     }
 
@@ -179,11 +130,7 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           const SizedBox(height: 180),
-          Icon(
-            Iconsax.warning_2,
-            size: 48,
-            color: AppColors.danger,
-          ),
+          const Icon(Iconsax.warning_2, size: 48, color: AppColors.danger),
           const SizedBox(height: 16),
           Center(
             child: Padding(
@@ -191,10 +138,7 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
               child: Text(
                 _error!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.textGrey,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
               ),
             ),
           ),
@@ -214,11 +158,7 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         children: const [
           SizedBox(height: 180),
-          Icon(
-            Iconsax.box_tick,
-            size: 52,
-            color: AppColors.textGrey,
-          ),
+          Icon(Iconsax.box_tick, size: 52, color: AppColors.textGrey),
           SizedBox(height: 16),
           Center(
             child: Text(
@@ -235,12 +175,9 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'There are no shortage requests at the moment.',
+                'There are no pending shortage requests at the moment.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.textGrey,
-                  fontSize: 13,
-                ),
+                style: TextStyle(color: AppColors.textGrey, fontSize: 13),
               ),
             ),
           ),
@@ -250,40 +187,20 @@ class _MissingMedicinesScreenState extends State<MissingMedicinesScreen> {
 
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       itemCount: _medicines.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        return _MissingMedicineCard(
-          medicine: _medicines[index],
-          statusColor: _statusColor(_medicines[index].status),
-          statusText: _statusText(_medicines[index].status),
-          isSelected: _selectedMedicineIds.contains(
-            _medicines[index].id,
-          ),
-          onSelected: () {
-            _toggleSelection(_medicines[index].id);
-          },
-        );      },
+      itemBuilder: (context, index) => _MissingMedicineCard(
+        medicine: _medicines[index],
+      ),
     );
-    
   }
 }
 
 class _MissingMedicineCard extends StatelessWidget {
   final MissingMedicineModel medicine;
-  final Color statusColor;
-  final String statusText;
-  final bool isSelected;
-  final VoidCallback onSelected;
 
-  const _MissingMedicineCard({
-    required this.medicine,
-    required this.statusColor,
-    required this.statusText,
-    required this.isSelected,
-    required this.onSelected,
-  });
+  const _MissingMedicineCard({required this.medicine});
 
   @override
   Widget build(BuildContext context) {
@@ -292,17 +209,25 @@ class _MissingMedicineCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.border,
-        ),
+        border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Icon(Icons.check, size: 17, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   medicine.medicineName,
                   style: const TextStyle(
                     color: AppColors.textDark,
@@ -310,126 +235,28 @@ class _MissingMedicineCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-              ),
-              _StatusChip(
-                text: statusText,
-                color: statusColor,
-              ),
-            ],
-          ),
-
-          if (medicine.barcode.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              'Barcode: ${medicine.barcode}',
-              style: const TextStyle(
-                color: AppColors.textGrey,
-                fontSize: 12,
-              ),
-            ),
-          ],
-
-          const SizedBox(height: 14),
-
-          Row(
-              children: [
-                GestureDetector(
-                  onTap: onSelected,
-                  child: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.surface,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.border,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: isSelected
-                        ? const Icon(
-                            Icons.check,
-                            size: 17,
-                            color: Colors.white,
-                          )
-                        : null,
-                  ),
-                ),
-
-                const SizedBox(width: 12),
-
-                Expanded(
-                  child: Text(
-                    medicine.medicineName,
+                if (medicine.barcode.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'Barcode: ${medicine.barcode}',
                     style: const TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      color: AppColors.textGrey,
+                      fontSize: 12,
                     ),
                   ),
-                ),
-
-                _StatusChip(
-                  text: statusText,
-                  color: statusColor,
+                ],
+                const SizedBox(height: 8),
+                Text(
+                  'Required: ${medicine.requiredQuantity}',
+                  style: const TextStyle(
+                    color: AppColors.textGrey,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
-          if (medicine.notes.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.chipGrey,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                medicine.notes,
-                style: const TextStyle(
-                  color: AppColors.textGrey,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ],
+          ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  final String text;
-  final Color color;
-
-  const _StatusChip({
-    required this.text,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }

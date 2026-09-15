@@ -30,9 +30,6 @@ class _ShortageDetailsScreenState
     MissingMedicineRepository();
   bool _isSubmitting = false;
 
-  bool get _hasShortage =>
-      _requiredQuantity > widget.medicine.stock;
-
   Future<void> _submitShortage() async {
   if (_isSubmitting) return;
 
@@ -260,47 +257,50 @@ class _ShortageDetailsScreenState
                 ),
               ),
 
-              if (!_hasShortage) ...[
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.chipGrey,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Iconsax.info_circle,
-                            size: 20,
-                            color: AppColors.textGrey,
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'The available stock is enough for this quantity. '
-                              'No shortage is required.',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textGrey,
-                              ),
-                            ),
-                          ),
-                        ],
+              const SizedBox(height: 16),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: widget.medicine.stock > 0
+                      ? AppColors.success.withOpacity(0.08)
+                      : AppColors.danger.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      widget.medicine.stock > 0
+                          ? Iconsax.tick_circle
+                          : Iconsax.close_circle,
+                      size: 20,
+                      color: widget.medicine.stock > 0
+                          ? AppColors.success
+                          : AppColors.danger,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      widget.medicine.stock > 0
+                          ? 'Stock is sufficient'
+                          : 'Stock is insufficient',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: widget.medicine.stock > 0
+                            ? AppColors.success
+                            : AppColors.danger,
                       ),
                     ),
-
-                    const SizedBox(height: 16),
                   ],
+                ),
+              ),
 
               SizedBox(
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                    onPressed: (_isSubmitting || !_hasShortage)
-                        ? null
-                        : _submitShortage,
+                    onPressed: _isSubmitting ? null : _submitShortage,
                     child: _isSubmitting
                         ? const SizedBox(
                             width: 22,

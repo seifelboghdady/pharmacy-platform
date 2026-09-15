@@ -5,6 +5,8 @@ import '../../scanner/screens/qr_scanner_screen.dart';
 import '../../inventory/screens/medicines_list_screen.dart';
 import '../../missing_medicines/screens/add_shortage_screen.dart';
 import '../../missing_medicines/screens/missing_medicines_screen.dart';
+import '../../orders/screens/orders_screen.dart';
+import '../../reports/screens/reports_screen.dart';
 
 class _Action {
   final IconData icon;
@@ -36,8 +38,14 @@ class QuickActionsScreen extends StatelessWidget {
             ),
           ),
         ),
-      const _Action.plain(
-          Iconsax.add_square, 'Add Order', 'Create new order'),
+      _Action(
+        Iconsax.receipt_2,
+        'Orders',
+        'View purchase orders',
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const OrdersScreen()),
+        ),
+      ),
       _Action(Iconsax.health, 'View Medicines', 'Browse all medicines',
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => const MedicinesListScreen()))),
@@ -51,8 +59,11 @@ class QuickActionsScreen extends StatelessWidget {
           ),
         ),
       ),
-      const _Action.plain(
-          Iconsax.chart_2, 'View Reports', 'See reports & analytics'),
+      _Action(
+          Iconsax.chart_2, 'View Reports', 'See reports & analytics',
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ReportsScreen()),
+          )),
       const _Action.plain(
           Iconsax.setting_2, 'Settings', 'App preferences'),
       
