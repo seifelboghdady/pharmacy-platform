@@ -152,14 +152,16 @@ class _ScannerViewState extends State<_ScannerView> {
                             size: 64,
                           ),
                           const SizedBox(height: 16),
-                          Text(
+                          SelectableText(
                             error.errorCode == MobileScannerErrorCode.permissionDenied
                                 ? 'Camera permission denied.\nPlease allow camera access from Settings.'
-                                : 'Camera error: ${error.errorDetails?.message ?? 'Unknown error'}',
+                                : 'Camera error code: ${error.errorCode}\n'
+                                  'Message: ${error.errorDetails?.message}\n'
+                                  'Details: ${error.errorDetails?.details}\n',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white70,
-                              fontSize: 14,
+                              fontSize: 12,
                             ),
                           ),
                           const SizedBox(height: 20),
