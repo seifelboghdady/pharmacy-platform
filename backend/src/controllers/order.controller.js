@@ -134,14 +134,7 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Supplier is required only when receiving the order
     if (value.status === "received") {
-      if (!value.supplier || !value.supplier.trim()) {
-        return res.status(400).json({
-          message: "Supplier is required when receiving the order"
-        });
-      }
-
       for (const item of order.items) {
         const medicine = await Medicine.findOne({
           barcode: item.barcode,
@@ -164,7 +157,10 @@ const updateOrderStatus = async (req, res) => {
         }
       );
 
-      order.supplier = value.supplier.trim();
+      // Save supplier only if Flutter sends it
+      if (value.supplier && value.supplier.trim()) {
+        order.supplier = value.supplier.trim();
+      }
     }
 
     order.status = value.status;
