@@ -8,6 +8,9 @@ const createUserSchema = Joi.object({
   pharmacyName: Joi.string()
     .trim()
     .optional(),
+  role: Joi.string()
+    .trim()
+    .optional()
 });
 
 const loginUserSchema = Joi.object({
