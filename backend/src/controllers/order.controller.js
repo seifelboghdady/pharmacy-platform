@@ -46,14 +46,7 @@ const getOrders = async (req, res) => {
 
 const generateOrderFromMissingMedicines = async (req, res) => {
   try {
-    const { supplier } = req.body;
-
-    if (!supplier || !supplier.trim()) {
-      return res.status(400).json({
-        message: "Supplier is required"
-      });
-    }
-
+    
     const missingMedicines = await MissingMedicine.find({
       pharmacy: req.user.pharmacyId,
       status: "pending"
@@ -84,7 +77,7 @@ const generateOrderFromMissingMedicines = async (req, res) => {
 
     const order = await Order.create({
       pharmacy: req.user.pharmacyId,
-      supplier: supplier.trim(),
+      supplier: null,
       createdBy: req.user.userId,
       generatedAutomatically: true,
       items
@@ -141,7 +134,14 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
+    // Supplier is required only when receiving the order
     if (value.status === "received") {
+      if (!value.supplier || !value.supplier.trim()) {
+        return res.status(400).json({
+          message: "Supplier is required when receiving the order"
+        });
+      }
+
       for (const item of order.items) {
         const medicine = await Medicine.findOne({
           barcode: item.barcode,
@@ -163,6 +163,8 @@ const updateOrderStatus = async (req, res) => {
           status: "fulfilled"
         }
       );
+
+      order.supplier = value.supplier.trim();
     }
 
     order.status = value.status;
@@ -173,6 +175,7 @@ const updateOrderStatus = async (req, res) => {
       message: "Order status updated successfully",
       order
     });
+
   } catch (error) {
     console.error(error);
 
