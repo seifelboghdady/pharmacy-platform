@@ -1,7 +1,7 @@
 const Joi = require("joi");
 
 const createOrderSchema = Joi.object({
-    supplier: Joi.string().trim().required(),
+    supplier: Joi.string().trim().optional(),
     status: Joi.string().valid("pending", "received", "cancelled")
         .default("pending"),
     orderDate: Joi.date(),
