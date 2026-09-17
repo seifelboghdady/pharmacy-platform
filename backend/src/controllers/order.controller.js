@@ -164,7 +164,10 @@ const updateOrderStatus = async (req, res) => {
         }
       );
 
-      order.supplier = value.supplier.trim();
+      // Save supplier only if Flutter sends it
+      if (value.supplier && value.supplier.trim()) {
+        order.supplier = value.supplier.trim();
+      }
     }
 
     order.status = value.status;
