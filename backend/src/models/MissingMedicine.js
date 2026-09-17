@@ -33,6 +33,11 @@ const missingMedicineSchema = new mongoose.Schema({
     ref: "User",
     required: true
     },
+    pharmacy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    }
 },{timestamps: true});
 
 module.exports = mongoose.model("MissingMedicine", missingMedicineSchema);

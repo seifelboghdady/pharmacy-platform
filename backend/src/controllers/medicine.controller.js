@@ -22,7 +22,10 @@ const createMedicine = async (req, res) => {
       });
     }
 
-    const medicine = await Medicine.create(value);
+    const medicine = await Medicine.create({
+      ...value,
+      pharmacy: req.user.pharmacyId
+    });
 
     return res.status(201).json(medicine);
   } catch (error) {
@@ -44,7 +47,9 @@ const getMedicines = async (req, res) => {
       limit = 10
     } = req.query;
 
-    const filter = {};
+    const filter = {
+      pharmacy: req.user.pharmacyId
+    };
 
     // Search in MedicineCatalog
     if (name || barcode || category) {
@@ -124,7 +129,7 @@ const getMedicines = async (req, res) => {
 };
 
 const getMedicineById = async (req, res) => {
-    const medicine = await Medicine.findById(req.params.id)
+    const medicine = await Medicine.findOne({_id: req.params.id, pharmacy: req.user.pharmacyId})
     .populate("medicineCatalog");
     if (!medicine) {
     return res.status(404).json({
@@ -144,7 +149,10 @@ const updateMedicine = async (req, res) => {
       });
     }
 
-    const medicine = await Medicine.findById(req.params.id);
+    const medicine = await Medicine.findOne({
+      _id: req.params.id,
+      pharmacy: req.user.pharmacyId
+    });
 
     if (!medicine) {
       return res.status(404).json({
@@ -185,15 +193,27 @@ const updateMedicine = async (req, res) => {
 };
 
 const deleteMedicine = async (req, res) => {
-    const medicine = await Medicine.findByIdAndDelete(req.params.id);
-    if(!medicine){
-        return res.status(404).json({
-            message: "Medicine not found"
-        });
-    }
-    return res.status(200).json({
-        message: "Medicine deleted successfully"
+  try {
+    const medicine = await Medicine.findOneAndDelete({
+      _id: req.params.id,
+      pharmacy: req.user.pharmacyId
     });
+
+    if (!medicine) {
+      return res.status(404).json({
+        message: "Medicine not found"
+      });
+    }
+
+    return res.status(200).json({
+      message: "Medicine deleted successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message
+    });
+  }
 };
 
 module.exports = {

@@ -27,7 +27,12 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true
-    }
+  },
+  pharmacyOwner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  }
 
 },{timestamps: true});
 

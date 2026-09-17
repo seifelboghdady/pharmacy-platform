@@ -22,9 +22,15 @@ const medicineSchema = new mongoose.Schema({
     supplier: {
         type: String,
         required: true
+    },
+    pharmacy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     }
 }, {timestamps: true});
 
+medicineSchema.index({ pharmacy: 1 });
 medicineSchema.index({ medicineCatalog: 1 });
 medicineSchema.index({ expiryDate: 1 });
 
