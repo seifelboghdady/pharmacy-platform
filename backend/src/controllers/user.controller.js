@@ -1,27 +1,45 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Joi = require("joi");
 const { createUserSchema, loginUserSchema } = require("../validations/user.validation");
 
 const createUser = async (req, res) => {
-    try{
+  try {
+      const { name, email, password, phone } = req.body;
       const { error, value } = createUserSchema.validate(req.body);
 
       if (error) {
         return res.status(400).json({
-            message: error.details[0].message
+          message: error.details[0].message
         });
       }
+      const pharmacyOwner = await User.findById(req.user.pharmacyId);
+      if (!pharmacyOwner) {
+        return res.status(404).json({
+          message: "Pharmacy owner not found"
+        });
+      }
+
       const hashedPassword = await bcrypt.hash(value.password, 10);
       const user = await User.create({
-        ...value,
-        password: hashedPassword
-        });
+        name,
+        email,
+        password: hashedPassword,
+        role: "employee",
+        pharmacyName: pharmacyOwner.pharmacyName,
+        phone,
+        pharmacyOwner: pharmacyOwner._id
+      });
     
         const token = jwt.sign(
           {
             userId: user._id,
-            role: user.role
+            role: user.role,
+            pharmacyId:
+              user.role === "owner"
+                ? user._id
+                : user.pharmacyOwner
           },
           process.env.JWT_SECRET,
           {
@@ -90,7 +108,11 @@ const loginUser = async (req, res) => {
   const token = jwt.sign(
     {
       userId: user._id,
-      role: user.role
+      role: user.role,
+      pharmacyId:
+        user.role === "owner"
+          ? user._id
+          : user.pharmacyOwner
     },
     process.env.JWT_SECRET,
     {
@@ -114,7 +136,11 @@ const loginUser = async (req, res) => {
 
 const registerOwner = async (req, res) => {
   try {
-    const { error, value } = createUserSchema.validate(req.body);
+    const ownerSchema = createUserSchema.keys({
+      pharmacyName: Joi.string().trim().required()
+    });
+
+    const { error, value } = ownerSchema.validate(req.body);
 
     if (error) {
       return res.status(400).json({
@@ -122,23 +148,23 @@ const registerOwner = async (req, res) => {
       });
     }
 
-    if (value.role !== "owner") {
-      return res.status(403).json({
-        message: "Only owner registration is allowed"
-      });
-    }
-
     const hashedPassword = await bcrypt.hash(value.password, 10);
 
     const user = await User.create({
-      ...value,
-      password: hashedPassword
+      name: value.name,
+      email: value.email,
+      password: hashedPassword,
+      role: "owner",
+      pharmacyName: value.pharmacyName,
+      phone: value.phone,
+      pharmacyOwner: null
     });
 
     const token = jwt.sign(
       {
         userId: user._id,
-        role: user.role
+        role: user.role,
+        pharmacyId: user._id
       },
       process.env.JWT_SECRET,
       {

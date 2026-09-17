@@ -13,8 +13,9 @@ const createOrder = async (req, res) => {
             });
         }
         const order = await Order.create({
-            ...value,
-            createdBy: req.user.userId
+          ...value,
+          pharmacy: req.user.pharmacyId,
+          createdBy: req.user.userId
         });
         return res.status(201).json(order);
     }catch (error) {
@@ -28,7 +29,10 @@ const createOrder = async (req, res) => {
 
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find({
+      pharmacy: req.user.pharmacyId
+    })
+      .populate("createdBy", "name email");
 
     return res.status(200).json(orders);
   } catch (error) {
@@ -42,7 +46,16 @@ const getOrders = async (req, res) => {
 
 const generateOrderFromMissingMedicines = async (req, res) => {
   try {
+    const { supplier } = req.body;
+
+    if (!supplier || !supplier.trim()) {
+      return res.status(400).json({
+        message: "Supplier is required"
+      });
+    }
+
     const missingMedicines = await MissingMedicine.find({
+      pharmacy: req.user.pharmacyId,
       status: "pending"
     });
 
@@ -69,35 +82,19 @@ const generateOrderFromMissingMedicines = async (req, res) => {
 
     const items = Object.values(groupedMedicines);
 
-    // const items = [];
-
-    // for (const missingMedicine of missingMedicines) {
-    //   const medicine = await Medicine.findOne({
-    //     barcode: missingMedicine.barcode
-    //   });
-
-    //   if (!medicine) {
-    //     return res.status(404).json({
-    //       message: `Medicine with barcode ${missingMedicine.barcode} not found`
-    //     });
-    //   }
-
-    //   items.push({
-    //     medicine: medicine._id,
-    //     quantity: missingMedicine.requiredQuantity
-    //   });
-    // }
-
-
     const order = await Order.create({
-      supplier: "Unknown",
+      pharmacy: req.user.pharmacyId,
+      supplier: supplier.trim(),
       createdBy: req.user.userId,
       generatedAutomatically: true,
       items
     });
 
     await MissingMedicine.updateMany(
-      { status: "pending" },
+      {
+        pharmacy: req.user.pharmacyId,
+        status: "pending"
+      },
       {
         status: "ordered",
         order: order._id
@@ -127,7 +124,10 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findOne({
+      _id: req.params.id,
+      pharmacy: req.user.pharmacyId
+    });
 
     if (!order) {
       return res.status(404).json({
@@ -144,7 +144,8 @@ const updateOrderStatus = async (req, res) => {
     if (value.status === "received") {
       for (const item of order.items) {
         const medicine = await Medicine.findOne({
-          barcode: item.barcode
+          barcode: item.barcode,
+          pharmacy: req.user.pharmacyId
         });
 
         if (medicine) {
@@ -154,8 +155,13 @@ const updateOrderStatus = async (req, res) => {
       }
 
       await MissingMedicine.updateMany(
-        { order: order._id },
-        { status: "fulfilled" }
+        {
+          order: order._id,
+          pharmacy: req.user.pharmacyId
+        },
+        {
+          status: "fulfilled"
+        }
       );
     }
 
@@ -178,7 +184,11 @@ const updateOrderStatus = async (req, res) => {
 
 const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findOne({
+      _id: req.params.id,
+      pharmacy: req.user.pharmacyId
+    })
+      .populate("createdBy", "name email");
 
     if (!order) {
       return res.status(404).json({

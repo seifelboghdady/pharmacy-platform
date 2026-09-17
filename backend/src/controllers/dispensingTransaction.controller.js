@@ -13,7 +13,10 @@ const createDispensingTransaction = async (req, res) => {
       });
     }
 
-    const medicine = await Medicine.findById(value.medicine);
+    const medicine = await Medicine.findOne({
+      _id: value.medicine,
+      pharmacy: req.user.pharmacyId
+    });
 
     if (!medicine) {
       return res.status(404).json({
@@ -68,7 +71,17 @@ const createDispensingTransaction = async (req, res) => {
 
 const getDispensingTransactions = async (req, res) => {
   try {
-    const transactions = await DispensingTransaction.find()
+    const medicines = await Medicine.find({
+      pharmacy: req.user.pharmacyId
+    }).select("_id");
+
+    const medicineIds = medicines.map(
+      (medicine) => medicine._id
+    );
+
+    const transactions = await DispensingTransaction.find({
+      medicine: { $in: medicineIds }
+    })
       .populate({
         path: "medicine",
         populate: {
@@ -93,9 +106,18 @@ const getDispensingTransactions = async (req, res) => {
 
 const getDispensingTransactionById = async (req, res) => {
   try {
-    const transaction = await DispensingTransaction.findById(
-      req.params.id
-    )
+    const medicines = await Medicine.find({
+      pharmacy: req.user.pharmacyId
+    }).select("_id");
+    
+    const medicineIds = medicines.map(
+      (medicine) => medicine._id
+    );
+
+    const transaction = await DispensingTransaction.findOne({
+      _id: req.params.id,
+      medicine: { $in: medicineIds }
+    })
       .populate({
         path: "medicine",
         populate: {
